@@ -7,15 +7,18 @@ import Loader from '../components/Loader'
 import Message from '../components/Message'
 import { listProductDetails } from '../actions/productActions'
 
-function Productscreen({match}) {
+function Productscreen({match ,history}) {
     const [qty,setqty]=useState(1)
-
     const dispatch = useDispatch()
     const producDetails = useSelector(state => state.productDetails)
     const {loading,error,product}=producDetails
     useEffect(()=>{
         dispatch(listProductDetails(match.params.id))
     },[dispatch ,match]);
+
+    const addToCardHandler=()=>{
+        history.push(`/cart/${match.params.id}?qty=${qty}`)
+    }
 
     return (
         <div>
@@ -64,15 +67,34 @@ function Productscreen({match}) {
                                     </Col>
                                 </Row>
                             </ListGroup.Item>
-
-                            <ListGroup>
+                            {product.countInStock>0 && (
+                                <ListGroup.Item>
+                                    <Row>
+                                        <Col>Qty</Col>
+                                        <Col xs="auto" className="my-1">
+                                        <Form.Control
+                                        as="select"
+                                        value={qty}
+                                        onChange={(e)=>setqty(e.target.value)}>
+                                            {
+                                                [...Array(product.countInStock).keys()].map((x)=>(
+                                                    <option value={x+1} key={x+1}>{x+1}</option>
+                                                ))
+                                            }
+                                        </Form.Control>
+                                        </Col>
+                                    </Row>
+                                </ListGroup.Item>
+                            )}
+                            <ListGroup.Item>
                                 <Button 
+                                onClick={addToCardHandler}
                                 className="btn-block" 
                                 type='button' 
                                 disabled={product.countInStock === 0} >
                                     Add to Cart
                                 </Button>
-                            </ListGroup>
+                            </ListGroup.Item>
                         </ListGroup>
                     </Card>
                 </Col>
