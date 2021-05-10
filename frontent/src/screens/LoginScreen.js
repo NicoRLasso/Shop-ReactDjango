@@ -7,18 +7,28 @@ import FormContainer from "../components/FormContainer";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../actions/userActions";
 
-function LoginScreen() {
-  const { email, setEmail } = useState("");
-  const { password, setPassword } = useState("");
+function LoginScreen({ location, history }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
+  const dispatch = useDispatch();
   const submitHandler = (e) => {
     e.preventDefault();
-    console.log("sumbit");
+    dispatch(login(email, password));
   };
-
+  const redirect = location.search ? location.search("=")[1] : "/";
+  const userLogin = useSelector((state) => state.userLogin);
+  const { error, loading, userInfo } = userLogin;
+  useEffect(() => {
+    if (userInfo) {
+      history.push(redirect);
+    }
+  }, [history, userInfo, redirect]);
   return (
     <FormContainer>
       <h1>Sign in</h1>
+      {error && <Message variant="danger">{error}</Message>}
+      {loading && <Loader />}
       <Form onSubmit={submitHandler}>
         <Form.Group>
           <Form.Label>Email Address</Form.Label>
@@ -43,6 +53,17 @@ function LoginScreen() {
           Sign IN
         </Button>
       </Form>
+      <Row className="py-3">
+        <Col>
+          New Customer?{" "}
+          <Link
+            to={redirect ? `/register?redirect=${redirect}` : "/register"}
+            className="btn"
+          >
+            Register
+          </Link>
+        </Col>
+      </Row>
     </FormContainer>
   );
 }
